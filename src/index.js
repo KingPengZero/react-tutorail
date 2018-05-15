@@ -1,3 +1,14 @@
-var foo = document.createElement('div');
-foo.innerHTML = 'bar';
-document.body.appendChild(foo);
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+class App extends React.Component {
+    render() {
+        return (
+            <div>
+                hello react
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(<App/>, document.getElementById("app"));
