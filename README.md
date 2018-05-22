@@ -109,10 +109,6 @@ document.body.appendChild(foo);
 
 
 
-
-
-
-
 ##### 自动将 js 文件引入 html 中
 
 `npm i html-webpack-plugin  --save-dev`
@@ -176,11 +172,11 @@ module.exports = {
 
 `npm i react react-dom --save`
 
-其中react是react的核心代码，react-dom提供了针对DOM的方法 
+其中 `react` 是react的核心代码，`react-dom `提供了针对DOM的方法 
 
 
 
-#### 使用ES6
+#### 使用ES6, JSX
 
 `npm i babel-core babel-loader babel-preset-es2015 babel-preset-react --save-dev`
 
@@ -242,38 +238,295 @@ module.exports = {
 ### loader
 
 `webpack` 自身只理解 JavaScript 语法
+
 loader 让 webpack 能够去处理那些非 JavaScript 文件
 
 在 webpack 的配置中 loader 有两个属性：
-
-test 属性，用于标识出应该被对应的 loader 进行转换的某个或某些文件。
-use 属性，表示进行转换时，应该使用哪个 loader。
+`test` 属性，用于标识出应该被对应的 loader 进行转换的某个或某些文件。
+`use` 属性，表示进行转换时，应该使用哪个 loader。
 
 
 
 #### 在react中书写样式的方式
 
+a. 使用行内样式 ( 不推荐 )
 
+
+
+b. 引入`.css` 文件
+
+
+
+
+
+#### 解析css
+
+`npm i css-loader style-loader --save-dev `
+
+
+
+*webpack.config.js*
+
+```js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    entry: path.resolve(__dirname, 'src/index.js'),
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'main.js',
+    },
+    module: {
+        rules: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+                loader: 'babel-loader',
+                options: {
+                    presets: ['react', 'es2015'],
+                },
+
+            }
+        }, {
+            test: /\.css$/,
+            use: ["style-loader", "css-loader"]
+        },]
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: 'title',
+            template: path.resolve(__dirname, 'src/template/index.html'),
+            hash: true,
+        }),
+    ]
+};
+```
+
+
+
+*src/index.js*
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './style.css';
+
+class App extends React.Component {
+    render() {
+        return (
+            <div>
+                hello react
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(<App/>, document.getElementById("app"));
+```
+
+
+
+*src/style.css*
+
+```css
+div {
+    background: skyblue;
+}
+```
+
+
+
+#### 使用 less 或者 sass
+
+`npm install less-loader` 或者 `npm install sass-loader`. 
 
 
 
 #### css 文件分离
 
+???
+
+
+
+#### 处理图片
+
+`npm install file-loader url-loader --save-dev`
+
+
+
+*webpack.config.js*
+
+```js
+{
+    test: /\.(png|jpg)$/,
+    use: {
+        loader: 'url-loader',
+        options: {
+            limit: 2048,
+        },
+    }
+}
+```
 
 
 
 
-#### 使用组件库
+
+#### 使用组件库 
+
+`npm i antd --save`
+
+
+
+##### 按需加载
+
+`npm i babel-plugin-import --save`
+
+
+
+*webpack.config.js*
+
+```
+{
+    test: /\.js$/,
+    exclude: /node_modules/,
+    use: {
+        loader: 'babel-loader',
+        options: {
+            presets: ['react', 'es2015'],
+            plugins: [
+                ["import", {"libraryName": "antd", "libraryDirectory": "es", "style": "css"}] // `style: true` 会加载 less 文件
+            ]
+        },
+    }
+}
+```
+
+
+
+#### 打包前清理
+
+`npm i clean-webpack-plugin --save`
+
+
+
+*webpack.config.js*
+
+```js
+plugins: [
+    new CleanPlugin(path.resolve(__dirname, 'dist'))
+],
+```
 
 
 
 
 
+使用hash
 
 
 
 
 
+合并 webpack.config
 
 
 
+
+
+多入口模式
+
+
+
+
+
+分离第三方应用
+
+*webpack.config.js*
+
+```js
+optimization: {
+    splitChunks: {
+        cacheGroups: {
+            commons: {
+                test: /node_modules/,
+                name: "vendor",
+                chunks: "all"
+            }
+        }
+    }
+}
+```
+
+
+
+
+
+### React 的生命周期
+
+#### 实例化 
+
+
+
+
+
+#### 存在期 
+
+
+
+#### 销毁&清理期 
+
+
+
+说明生命周期的API。
+
+**componentWillMount**
+在完成首次渲染之前调用，此时仍可以修改组件的state。
+
+**render**
+必选的方法，创建虚拟DOM，该方法具有特殊的规则：
+* 只能通过this.props和this.state访问数据
+* 可以返回null、false或任何React组件
+* V15中只能出现一个顶级组件, V16可以返回数组
+* 不能改变组件的状态
+* 不能修改DOM的输出
+
+**componentDidMount**
+真实的DOM被渲染出来后调用，在该方法中可通过this.getDOMNode()访问到真实的DOM元素。此时已可以使用其他类库来操作这个DOM。
+在服务端中，该方法不会被调用。
+
+**componentWillReceiveProps**
+组件接收到新的props时调用，并将其作为参数nextProps使用，此时可以更改组件props及state。
+
+```
+componentWillReceiveProps: function(nextProps) {
+
+if (nextProps.bool) {
+
+this.setState({
+
+bool: true
+
+});
+
+}
+
+}
+```
+
+
+
+**shouldComponentUpdate**
+组件是否应当渲染新的props或state，返回false表示跳过后续的生命周期方法，通常不需要使用以避免出现bug。在出现应用的瓶颈时，可通过该方法进行适当的优化。
+在首次渲染期间或者调用了forceUpdate方法后，该方法不会被调用
+
+**componentWillUpdate**
+接收到新的props或者state后，进行渲染之前调用，此时不允许更新props或state。
+
+**componentDidUpdate**
+完成渲染新的props或者state后调用，此时可以访问到新的DOM元素。
+
+**componentWillUnmount**
+
+组件被移除之前被调用，可以用于做一些清理工作，在componentDidMount方法中添加的所有任务都需要在该方法中撤销，比如创建的定时器或添加的事件监听器。
