@@ -176,6 +176,8 @@ module.exports = {
 
 
 
+
+
 #### 使用ES6, JSX
 
 `npm i babel-core babel-loader babel-preset-es2015 babel-preset-react --save-dev`
@@ -345,6 +347,20 @@ div {
 
 #### css 文件分离
 
+##### webpack 3
+
+`npm i extract-text-webpack-plugin --save-dev`
+
+```
+    new ExtractTextPlugin({
+      filename: 'style.css'
+    }),
+```
+
+
+
+##### webpack 4
+
 ???
 
 
@@ -463,23 +479,15 @@ optimization: {
 
 
 
-### React 的生命周期
+### React
 
-#### 实例化 
-
-
+[文档](https://doc.react-china.org/)
 
 
 
-#### 存在期 
 
 
-
-#### 销毁&清理期 
-
-
-
-说明生命周期的API。
+###  生命周期
 
 **componentWillMount**
 在完成首次渲染之前调用，此时仍可以修改组件的state。
@@ -489,29 +497,25 @@ optimization: {
 * 只能通过this.props和this.state访问数据
 * 可以返回null、false或任何React组件
 * V15中只能出现一个顶级组件, V16可以返回数组
-* 不能改变组件的状态
-* 不能修改DOM的输出
+
+
 
 **componentDidMount**
 真实的DOM被渲染出来后调用，在该方法中可通过this.getDOMNode()访问到真实的DOM元素。此时已可以使用其他类库来操作这个DOM。
 在服务端中，该方法不会被调用。
 
+
+
 **componentWillReceiveProps**
 组件接收到新的props时调用，并将其作为参数nextProps使用，此时可以更改组件props及state。
 
-```
+```Js
 componentWillReceiveProps: function(nextProps) {
-
-if (nextProps.bool) {
-
-this.setState({
-
-bool: true
-
-});
-
-}
-
+    if (nextProps.bool) {
+        this.setState({
+            bool: true
+        });
+    }
 }
 ```
 
@@ -530,3 +534,6 @@ bool: true
 **componentWillUnmount**
 
 组件被移除之前被调用，可以用于做一些清理工作，在componentDidMount方法中添加的所有任务都需要在该方法中撤销，比如创建的定时器或添加的事件监听器。
+
+
+
